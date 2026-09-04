@@ -2,11 +2,14 @@ import apiClient from "./apiClient";
 
 const teacherService = {
   getTeachers: async (token) => {
-    const response = await apiClient.get("/teachers", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await apiClient.get(
+      "/teachers",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   },
@@ -24,10 +27,13 @@ const teacherService = {
     return response.data;
   },
 
-  createTeacher: async (token, data) => {
+  createTeacher: async (
+    token,
+    formData
+  ) => {
     const response = await apiClient.post(
       "/teachers",
-      data,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -38,10 +44,14 @@ const teacherService = {
     return response.data;
   },
 
-  updateTeacher: async (token, id, data) => {
+  updateTeacher: async (
+    token,
+    id,
+    formData
+  ) => {
     const response = await apiClient.put(
       `/teachers/${id}`,
-      data,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,

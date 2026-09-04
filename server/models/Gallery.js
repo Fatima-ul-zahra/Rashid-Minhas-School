@@ -15,10 +15,17 @@ const gallerySchema = new mongoose.Schema(
       default: "",
     },
 
-    image: {
+    media: {
       type: String,
       required: true,
       trim: true,
+    },
+
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      required: true,
+      default: "image",
     },
 
     category: {

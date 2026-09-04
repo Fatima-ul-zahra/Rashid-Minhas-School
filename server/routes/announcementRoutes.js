@@ -1,7 +1,8 @@
 import express from "express";
 
 import {
-  getAnnouncements,
+  getPublicAnnouncements,
+  getAdminAnnouncements,
   getAnnouncementById,
   createAnnouncement,
   updateAnnouncement,
@@ -10,18 +11,19 @@ import {
 
 import protect from "../middleware/authMiddleware.js";
 import authorize from "../middleware/roleMiddleware.js";
+import uploadImage from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
 // Public
-router.get("/", getAnnouncements);
+router.get("/", getPublicAnnouncements);
 
-// Admin/staff
+// Admin
 router.get(
   "/admin",
   protect,
   authorize("admin", "staff"),
-  getAnnouncements
+  getAdminAnnouncements
 );
 
 router.get(
@@ -35,6 +37,7 @@ router.post(
   "/",
   protect,
   authorize("admin"),
+  uploadImage.single("image"),
   createAnnouncement
 );
 
@@ -42,6 +45,7 @@ router.put(
   "/:id",
   protect,
   authorize("admin"),
+  uploadImage.single("image"),
   updateAnnouncement
 );
 

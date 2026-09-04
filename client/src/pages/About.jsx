@@ -261,7 +261,7 @@ function About() {
                 </p>
 
                 <p className="mt-1 text-xs text-slate-500">
-                  Name to be provided
+                  Abdul Ghafoor Malik
                 </p>
               </div>
 

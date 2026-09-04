@@ -77,9 +77,13 @@ function Announcements() {
                   >
                     {announcement.image && (
                       <img
-                        src={announcement.image}
+                        src={
+                          announcement.image.startsWith("http")
+                            ? announcement.image
+                            : `http://localhost:5000${announcement.image}`
+                        }
                         alt={announcement.title}
-                        className="h-48 w-full object-cover"
+                        className="w-full h-64 object-cover rounded-xl"
                       />
                     )}
 

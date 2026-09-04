@@ -15,13 +15,15 @@ function Gallery() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // =========================
+  // Load Gallery
+  // =========================
   const loadGallery = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response =
-        await galleryService.getAdminGallery(token);
+      const response = await galleryService.getAdminGallery(token);
 
       setItems(response.data);
     } catch (error) {
@@ -40,6 +42,9 @@ function Gallery() {
     }
   }, [token]);
 
+  // =========================
+  // Categories
+  // =========================
   const categories = useMemo(() => {
     return [
       ...new Set(
@@ -50,18 +55,17 @@ function Gallery() {
     ];
   }, [items]);
 
+  // =========================
+  // Filter Gallery
+  // =========================
   const filteredItems = useMemo(() => {
     const value = search.toLowerCase().trim();
 
     return items.filter((item) => {
       const matchesSearch =
         !value ||
-        item.title
-          ?.toLowerCase()
-          .includes(value) ||
-        item.caption
-          ?.toLowerCase()
-          .includes(value);
+        item.title?.toLowerCase().includes(value) ||
+        item.caption?.toLowerCase().includes(value);
 
       const matchesCategory =
         !category || item.category === category;
@@ -77,38 +81,45 @@ function Gallery() {
     });
   }, [items, search, category, status]);
 
+  // =========================
+  // Toggle Publish Status
+  // =========================
   const handleToggleStatus = async (item) => {
-  try {
-    setError("");
+    try {
+      setError("");
 
-    const newStatus =
-      item.status === "published"
-        ? "unpublished"
-        : "published";
+      const newStatus =
+        item.status === "published"
+          ? "unpublished"
+          : "published";
 
-    const response =
-      await galleryService.updateGalleryItem(
-        token,
-        item._id,
-        {
-          status: newStatus,
-        }
+      const response =
+        await galleryService.updateGalleryItem(
+          token,
+          item._id,
+          {
+            status: newStatus,
+          }
+        );
+
+      setItems((current) =>
+        current.map((galleryItem) =>
+          galleryItem._id === item._id
+            ? response.data
+            : galleryItem
+        )
       );
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "Unable to change gallery status."
+      );
+    }
+  };
 
-    setItems((current) =>
-      current.map((galleryItem) =>
-        galleryItem._id === item._id
-          ? response.data
-          : galleryItem
-      )
-    );
-  } catch (error) {
-    setError(
-      error.response?.data?.message ||
-        "Unable to change gallery status."
-    );
-  }
-};
+  // =========================
+  // Delete Gallery Item
+  // =========================
   const handleDelete = async (item) => {
     const confirmed = window.confirm(
       `Delete "${item.title}"?`
@@ -117,6 +128,8 @@ function Gallery() {
     if (!confirmed) return;
 
     try {
+      setError("");
+
       await galleryService.deleteGalleryItem(
         token,
         item._id
@@ -136,8 +149,23 @@ function Gallery() {
     }
   };
 
+  // =========================
+  // Media URL
+  // =========================
+  const getMediaUrl = (media) => {
+    if (!media) return "";
+
+    return media.startsWith("http")
+      ? media
+      : `http://localhost:5000${media}`;
+  };
+
   return (
     <div className="p-4 sm:p-6">
+
+      {/* =================================
+          PAGE HEADER
+      ================================= */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-blue-700">
@@ -155,145 +183,250 @@ function Gallery() {
 
         <Link
           to="/admin/gallery/new"
-          className="rounded-xl bg-blue-700 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-800"
+          className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           + Add Image
         </Link>
       </div>
 
+      {/* =================================
+          ERROR MESSAGE
+      ================================= */}
       {error && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
           {error}
         </div>
       )}
 
+      {/* =================================
+          FILTERS
+      ================================= */}
       <div className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3">
-        <input
-          type="text"
-          value={search}
-          onChange={(event) =>
-            setSearch(event.target.value)
-          }
-          placeholder="Search gallery..."
-          className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600"
-        />
 
-        <select
-          value={category}
-          onChange={(event) =>
-            setCategory(event.target.value)
-          }
-          className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600"
-        >
-          <option value="">All Categories</option>
+        {/* Search */}
+        <div>
+          <label className="mb-2 block text-xs font-semibold text-slate-500">
+            Search
+          </label>
 
-          {categories.map((item) => (
-            <option key={item} value={item}>
-              {item}
+          <input
+            type="text"
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            placeholder="Search gallery..."
+            className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="mb-2 block text-xs font-semibold text-slate-500">
+            Category
+          </label>
+
+          <select
+            value={category}
+            onChange={(event) =>
+              setCategory(event.target.value)
+            }
+            className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="">All Categories</option>
+
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="mb-2 block text-xs font-semibold text-slate-500">
+            Status
+          </label>
+
+          <select
+            value={status}
+            onChange={(event) =>
+              setStatus(event.target.value)
+            }
+            className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          >
+            <option value="">All Statuses</option>
+
+            <option value="published">
+              Published
             </option>
-          ))}
-        </select>
 
-        <select
-          value={status}
-          onChange={(event) =>
-            setStatus(event.target.value)
-          }
-          className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600"
-        >
-          <option value="">All Statuses</option>
-          <option value="published">
-            Published
-          </option>
-          <option value="unpublished">
-            Unpublished
-          </option>
-        </select>
+            <option value="unpublished">
+              Unpublished
+            </option>
+          </select>
+        </div>
       </div>
 
+      {/* =================================
+          LOADING
+      ================================= */}
       {loading ? (
-        <div className="py-16 text-center text-sm text-slate-500">
-          Loading gallery...
+        <div className="py-16 text-center">
+          <p className="text-sm text-slate-500">
+            Loading gallery...
+          </p>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-12 text-center">
-          <h2 className="font-bold text-slate-900">
+
+        /* =================================
+           EMPTY STATE
+        ================================= */
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl">
+            🖼️
+          </div>
+
+          <h2 className="mt-4 font-bold text-slate-900">
             No gallery images found
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            Add your first school image.
+            Try changing your filters or add your first
+            school image.
           </p>
+
+          <Link
+            to="/admin/gallery/new"
+            className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800"
+          >
+            + Add Image
+          </Link>
         </div>
+
       ) : (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+        /* =================================
+           GALLERY GRID
+        ================================= */
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+
           {filteredItems.map((item) => (
+
             <div
               key={item._id}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-52 w-full object-cover"
-              />
 
+              {/* =================================
+                  MEDIA
+              ================================= */}
+              <div className="relative overflow-hidden bg-slate-100">
+
+                {item.mediaType === "video" ? (
+                  <video
+                    src={getMediaUrl(item.media)}
+                    controls
+                    className="h-52 w-full bg-black object-cover"
+                  />
+                ) : (
+                  <img
+                    src={getMediaUrl(item.media)}
+                    alt={item.title || "Gallery image"}
+                    className="h-52 w-full object-cover"
+                  />
+                )}
+
+              </div>
+
+              {/* =================================
+                  CARD CONTENT
+              ================================= */}
               <div className="p-5">
+
+                {/* Title + Category */}
                 <div className="flex items-start justify-between gap-3">
-                  <h2 className="font-bold text-slate-900">
+
+                  <h2 className="min-w-0 truncate font-bold text-slate-900">
                     {item.title}
                   </h2>
 
-                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                    {item.category}
+                  <span className="shrink-0 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                    {item.category || "General"}
                   </span>
+
                 </div>
 
-                <p className="mt-2 line-clamp-2 text-sm text-slate-500">
+                {/* Caption */}
+                <p className="mt-2 line-clamp-2 min-h-[40px] text-sm leading-5 text-slate-500">
                   {item.caption || "No caption"}
                 </p>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      item.status === "published"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
+                {/* =================================
+                    STATUS + ACTIONS
+                ================================= */}
+                <div className="mt-5 border-t border-slate-100 pt-4">
 
-                  <div className="flex flex-wrap gap-2">
-                        <Link
-                            to={`/admin/gallery/${item._id}/edit`}
-                            className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700"
-                        >
-                            Edit
-                        </Link>
+                  {/* Status Row */}
+                  <div className="mb-3 flex items-center justify-between">
 
-                        <button
-                            type="button"
-                            onClick={() =>
-                            handleToggleStatus(item)
-                            }
-                            className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700"
-                        >
-                            {item.status === "published"
-                            ? "Unpublish"
-                            : "Publish"}
-                        </button>
+                    <span className="text-xs font-medium text-slate-400">
+                      Status
+                    </span>
 
-                        <button
-                            type="button"
-                            onClick={() =>
-                            handleDelete(item)
-                            }
-                            className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600"
-                        >
-                            Delete
-                        </button>
-                        </div>
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold capitalize ${
+                        item.status === "published"
+                          ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-3 gap-2">
+
+                    {/* Edit */}
+                    <Link
+                      to={`/admin/gallery/${item._id}/edit`}
+                      className="flex h-10 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-2 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    >
+                      Edit
+                    </Link>
+
+                    {/* Publish / Unpublish */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleToggleStatus(item)
+                      }
+                      className={`flex h-10 items-center justify-center rounded-lg border px-2 text-xs font-semibold transition focus:outline-none focus:ring-2 ${
+                        item.status === "published"
+                          ? "border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100 focus:ring-amber-200"
+                          : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 focus:ring-emerald-200"
+                      }`}
+                    >
+                      {item.status === "published"
+                        ? "Unpublish"
+                        : "Publish"}
+                    </button>
+
+                    {/* Delete */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDelete(item)
+                      }
+                      className="flex h-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    >
+                      Delete
+                    </button>
+
+                  </div>
                 </div>
               </div>
             </div>

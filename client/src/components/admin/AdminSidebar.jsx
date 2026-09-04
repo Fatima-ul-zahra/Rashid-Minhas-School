@@ -18,6 +18,10 @@ const menuItems = [
     path: "/admin/classes",
   },
   {
+    name: "Fees",
+    path: "/admin/fees",
+  },
+  {
     name: "Attendance",
     path: "/admin/attendance",
   },
@@ -50,9 +54,11 @@ function AdminSidebar({ open, onClose }) {
         {/* Logo */}
         <div className="border-b border-white/10 px-6 py-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-700 font-bold">
-              RM
-            </div>
+            <img
+              src="/school-logo.png"
+              alt="Rashid Minhas School Logo"
+              className="h-12 w-12 object-contain"
+            />
 
             <div>
               <h1 className="font-bold">

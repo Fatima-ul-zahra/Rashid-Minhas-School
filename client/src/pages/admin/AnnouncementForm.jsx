@@ -21,6 +21,9 @@ function AnnouncementForm() {
 
   const [form, setForm] = useState(initialForm);
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -38,15 +41,21 @@ function AnnouncementForm() {
 
         setForm({
           title: announcement.title || "",
-          description:
-            announcement.description || "",
+          description: announcement.description || "",
           date: announcement.date
             ? announcement.date.slice(0, 10)
             : "",
           image: announcement.image || "",
-          status:
-            announcement.status || "unpublished",
+          status: announcement.status || "unpublished",
         });
+
+        if (announcement.image) {
+          setImagePreview(
+            announcement.image.startsWith("http")
+              ? announcement.image
+              : `http://localhost:5000${announcement.image}`
+          );
+        }
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -73,6 +82,57 @@ function AnnouncementForm() {
     }));
   };
 
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Only JPG, PNG and WEBP images are allowed."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Image must be smaller than 10MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+    setImageFile(file);
+
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview("");
+
+    setForm((current) => ({
+      ...current,
+      image: "",
+    }));
+
+    const fileInput =
+      document.getElementById("announcement-image");
+
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -90,16 +150,27 @@ function AnnouncementForm() {
       setSaving(true);
       setError("");
 
+      const formData = new FormData();
+
+      formData.append("title", form.title);
+      formData.append("description", form.description);
+      formData.append("date", form.date);
+      formData.append("status", form.status);
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
       if (isEdit) {
         await announcementService.updateAnnouncement(
           token,
           id,
-          form
+          formData
         );
       } else {
         await announcementService.createAnnouncement(
           token,
-          form
+          formData
         );
       }
 
@@ -147,6 +218,7 @@ function AnnouncementForm() {
         className="mt-6 max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="space-y-5">
+          {/* Title */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Title *
@@ -162,6 +234,7 @@ function AnnouncementForm() {
             />
           </div>
 
+          {/* Description */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Description *
@@ -178,7 +251,8 @@ function AnnouncementForm() {
             />
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          {/* Date + Status */}
+          <div className="grid gap-5 md:grid-cols-2">
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Date
@@ -189,20 +263,6 @@ function AnnouncementForm() {
                 name="date"
                 value={form.date}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Image URL
-              </label>
-
-              <input
-                name="image"
-                value={form.image}
-                onChange={handleChange}
-                placeholder="Optional"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
               />
             </div>
@@ -228,8 +288,48 @@ function AnnouncementForm() {
               </select>
             </div>
           </div>
+
+          {/* Announcement Image */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Announcement Image
+            </label>
+
+            <input
+              id="announcement-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageChange}
+              className="block w-full rounded-xl border border-slate-300 p-3 text-sm"
+            />
+
+            <p className="mt-2 text-xs text-slate-500">
+              JPG, PNG or WEBP only. Maximum file size: 10MB.
+            </p>
+
+            {imagePreview && (
+              <div className="mt-5">
+                <div className="relative max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                  <img
+                    src={imagePreview}
+                    alt="Announcement preview"
+                    className="h-64 w-full object-cover"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="mt-3 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Remove Image
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Buttons */}
         <div className="mt-8 flex justify-end gap-3">
           <Link
             to="/admin/announcements"

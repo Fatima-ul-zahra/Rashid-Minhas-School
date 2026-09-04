@@ -84,16 +84,20 @@ function TeacherView() {
       <div className="mt-6 max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-6 sm:flex-row">
           {teacher.photo ? (
-            <img
-              src={teacher.photo}
-              alt={teacher.name}
-              className="h-32 w-32 rounded-2xl object-cover"
-            />
-          ) : (
-            <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-blue-100 text-4xl font-bold text-blue-700">
-              {teacher.name?.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <img
+            src={
+              teacher.photo.startsWith("http")
+                ? teacher.photo
+                : `http://localhost:5000${teacher.photo}`
+            }
+            alt={teacher.name}
+            className="h-32 w-32 rounded-2xl object-cover"
+          />
+        ) : (
+          <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-blue-100 text-4xl font-bold text-blue-700">
+            {teacher.name?.charAt(0).toUpperCase()}
+          </div>
+        )}
 
           <div>
             <h2 className="text-2xl font-bold text-slate-900">

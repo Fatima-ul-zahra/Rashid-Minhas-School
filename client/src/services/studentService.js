@@ -21,10 +21,10 @@ const studentService = {
     return response.data;
   },
 
-  createStudent: async (token, student) => {
+  createStudent: async (token, formData) => {
     const response = await apiClient.post(
       "/students",
-      student,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -35,10 +35,10 @@ const studentService = {
     return response.data;
   },
 
-  updateStudent: async (token, id, student) => {
+  updateStudent: async (token, id, formData) => {
     const response = await apiClient.put(
       `/students/${id}`,
-      student,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,

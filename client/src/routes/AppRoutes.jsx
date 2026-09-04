@@ -45,6 +45,15 @@ import AnnouncementForm from "../pages/admin/AnnouncementForm";
 import GalleryAdmin from "../pages/admin/Gallery";
 import GalleryForm from "../pages/admin/GalleryForm";
 
+import StudentActivities from "../pages/StudentActivities";
+import StudentDailyActivity from "../components/admin/StudentDailyActivity";
+
+import FeeStructures from "../pages/admin/FeeStructures";
+
+import Fees from "../pages/admin/Fees";
+import FeeHistory from "../pages/admin/FeeHistory";
+import FeeReports from "../pages/admin/FeeReports";
+
 import Reports from "../pages/admin/Reports";
 
 function AppRoutes() {
@@ -68,6 +77,11 @@ function AppRoutes() {
           element={<Announcements />}
         />
 
+        <Route
+            path="/student-activities"
+            element={<StudentActivities />}
+          />
+
         <Route path="/gallery" element={<Gallery />} />
 
         <Route path="/contact" element={<Contact />} />
@@ -89,7 +103,7 @@ function AppRoutes() {
             element={<AdminDashboard />}
           />
 
-          {/* Students */}
+         {/* Students */}
 
           <Route
             path="/admin/students"
@@ -110,6 +124,8 @@ function AppRoutes() {
             path="/admin/students/:id/edit"
             element={<StudentForm />}
           />
+
+{/* Classes */}
 
           {/* Classes */}
 
@@ -208,6 +224,30 @@ function AppRoutes() {
             element={<Reports />}
           />
 
+          {/* Fees */}
+
+          <Route
+            path="/admin/fee-structures"
+            element={<FeeStructures />}
+          />
+
+          {/* ================= FEES ================= */}
+
+          <Route
+            path="/admin/fees"
+            element={<Fees />}
+          />
+
+          <Route
+            path="/admin/fee-history"
+            element={<FeeHistory />}
+          />
+
+          <Route
+            path="/admin/fee-reports"
+            element={<FeeReports />}
+
+          />
         </Route>
       </Route>
 

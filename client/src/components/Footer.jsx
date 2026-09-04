@@ -7,27 +7,30 @@ function Footer() {
     <footer className="bg-slate-950 text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
         {/* School */}
-        <div>
-          <Link to="/" className="mb-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-700 font-bold">
-              RM
-            </div>
+        {/* School */}
+          <div>
+            <Link to="/" className="mb-4 flex items-center gap-3">
+              <img
+                src="/school-logo.png"
+                alt="Rashid Minhas Secondary School Logo"
+                className="h-14 w-14 object-contain"
+              />
 
-            <div>
-              <h2 className="font-bold">Rashid Minhas</h2>
+              <div>
+                <h2 className="font-bold">Rashid Minhas</h2>
 
-              <p className="text-sm text-slate-400">
-                Secondary School, Ali Pur
-              </p>
-            </div>
-          </Link>
+                <p className="text-sm text-slate-400">
+                  Secondary School, Ali Pur
+                </p>
+              </div>
+            </Link>
 
-          <p className="max-w-sm text-sm leading-6 text-slate-400">
-            A professional school website and digital platform dedicated to
-            supporting students, parents, teachers, and the wider school
-            community.
-          </p>
-        </div>
+            <p className="max-w-sm text-sm leading-6 text-slate-400">
+              A professional school website and digital platform dedicated to
+              supporting students, parents, teachers, and the wider school
+              community.
+            </p>
+          </div>
 
         {/* Quick Links */}
         <div>
@@ -127,20 +130,25 @@ function Footer() {
 
           <div className="space-y-3 text-sm text-slate-400">
             <p>
-              <span className="font-medium text-slate-300">
-                Address:
-              </span>{" "}
-              <span className="text-amber-300">
-                School address to be provided
-              </span>
-            </p>
+            <span className="font-medium text-slate-300">
+              Address:
+            </span>{" "}
+            <a
+              href="https://maps.app.goo.gl/phKEs9ZgTqRuTXxa6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-300 hover:text-amber-200 hover:underline"
+            >
+              View School Location
+            </a>
+          </p>
 
             <p>
               <span className="font-medium text-slate-300">
                 Phone:
               </span>{" "}
               <span className="text-amber-300">
-                Phone number to be provided
+                +923347675556
               </span>
             </p>
 
@@ -149,7 +157,7 @@ function Footer() {
                 Email:
               </span>{" "}
               <span className="text-amber-300">
-                Email address to be provided
+                rmalipur@gmail.com
               </span>
             </p>
           </div>

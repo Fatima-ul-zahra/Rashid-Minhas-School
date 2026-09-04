@@ -15,7 +15,6 @@ const initialForm = {
   phone: "",
   address: "",
   admissionDate: "",
-  photo: "",
   status: "active",
 };
 
@@ -25,6 +24,10 @@ function StudentForm() {
   const { id } = useParams();
 
   const [form, setForm] = useState(initialForm);
+
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
+
   const [loading, setLoading] = useState(Boolean(id));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -44,8 +47,7 @@ function StudentForm() {
         setForm({
           name: student.name || "",
           fatherName: student.fatherName || "",
-          admissionNumber:
-            student.admissionNumber || "",
+          admissionNumber: student.admissionNumber || "",
           rollNumber: student.rollNumber || "",
           class: student.class || "",
           dateOfBirth: student.dateOfBirth
@@ -57,9 +59,16 @@ function StudentForm() {
           admissionDate: student.admissionDate
             ? student.admissionDate.slice(0, 10)
             : "",
-          photo: student.photo || "",
           status: student.status || "active",
         });
+
+        if (student.photo) {
+          const photoUrl = student.photo.startsWith("http")
+            ? student.photo
+            : `http://localhost:5000${student.photo}`;
+
+          setPhotoPreview(photoUrl);
+        }
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -82,6 +91,45 @@ function StudentForm() {
     }));
   };
 
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Only JPG, PNG and WEBP images are allowed."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError(
+        "Student photo must be smaller than 10 MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+
+    setPhotoFile(file);
+
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreview(previewUrl);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -89,16 +137,34 @@ function StudentForm() {
       setSaving(true);
       setError("");
 
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("fatherName", form.fatherName);
+      formData.append("admissionNumber", form.admissionNumber);
+      formData.append("rollNumber", form.rollNumber);
+      formData.append("class", form.class);
+      formData.append("dateOfBirth", form.dateOfBirth);
+      formData.append("gender", form.gender);
+      formData.append("phone", form.phone);
+      formData.append("address", form.address);
+      formData.append("admissionDate", form.admissionDate);
+      formData.append("status", form.status);
+
+      if (photoFile) {
+        formData.append("photo", photoFile);
+}
+
       if (isEditing) {
         await studentService.updateStudent(
           token,
           id,
-          form
+          formData
         );
       } else {
         await studentService.createStudent(
           token,
-          form
+          formData
         );
       }
 
@@ -144,6 +210,7 @@ function StudentForm() {
         className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="grid gap-5 md:grid-cols-2">
+
           <Input
             label="Student Name"
             name="name"
@@ -187,7 +254,9 @@ function StudentForm() {
               required
               className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
             >
-              <option value="">Select class</option>
+              <option value="">
+                Select class
+              </option>
 
               {Array.from(
                 { length: 10 },
@@ -243,13 +312,33 @@ function StudentForm() {
             onChange={handleChange}
           />
 
-          <Input
-            label="Photo URL"
-            name="photo"
-            value={form.photo}
-            onChange={handleChange}
-            placeholder="Optional"
-          />
+          {/* PHOTO UPLOAD */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Student Photo
+            </label>
+
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoChange}
+              className="w-full cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+            />
+
+            <p className="mt-2 text-xs text-slate-500">
+              JPG, PNG or WEBP. Maximum size: 10 MB.
+            </p>
+
+            {photoPreview && (
+              <div className="mt-4">
+                <img
+                  src={photoPreview}
+                  alt="Student preview"
+                  className="h-32 w-32 rounded-2xl object-cover border border-slate-200 shadow-sm"
+                />
+              </div>
+            )}
+          </div>
 
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -262,9 +351,17 @@ function StudentForm() {
               onChange={handleChange}
               className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="graduated">Graduated</option>
+              <option value="active">
+                Active
+              </option>
+
+              <option value="inactive">
+                Inactive
+              </option>
+
+              <option value="graduated">
+                Graduated
+              </option>
             </select>
           </div>
 
@@ -286,7 +383,9 @@ function StudentForm() {
         <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
-            onClick={() => navigate("/admin/students")}
+            onClick={() =>
+              navigate("/admin/students")
+            }
             className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
             Cancel

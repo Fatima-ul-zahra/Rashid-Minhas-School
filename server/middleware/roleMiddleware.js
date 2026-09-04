@@ -11,6 +11,15 @@ const authorize = (...allowedRoles) => {
       );
     }
 
+    if (!req.user.role) {
+      return next(
+        new ApiError(
+          403,
+          "User role is not configured."
+        )
+      );
+    }
+
     if (!allowedRoles.includes(req.user.role)) {
       return next(
         new ApiError(

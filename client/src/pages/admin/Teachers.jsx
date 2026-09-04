@@ -221,19 +221,22 @@ function Teachers() {
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        {teacher.photo ? (
-                          <img
-                            src={teacher.photo}
-                            alt={teacher.name}
-                            className="h-11 w-11 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
-                            {teacher.name
-                              ?.charAt(0)
-                              .toUpperCase()}
-                          </div>
-                        )}
+                    {teacher.photo ? (
+                      <img
+                        src={
+                          teacher.photo.startsWith("http")
+                            ? teacher.photo
+                            : `http://localhost:5000${teacher.photo}`
+                        }
+                        alt={teacher.name}
+                        className="h-11 w-11 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
+                        {teacher.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+
 
                         <div>
                           <p className="font-semibold text-slate-900">

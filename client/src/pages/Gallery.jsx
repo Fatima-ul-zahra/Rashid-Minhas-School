@@ -125,12 +125,29 @@ function Gallery() {
                   className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
                   <div className="relative overflow-hidden">
+                   {item.mediaType === "video" ? (
+                    <video
+                      src={
+                        item.media?.startsWith("http")
+                          ? item.media
+                          : `http://localhost:5000${item.media}`
+                      }
+                      controls
+                      preload="metadata"
+                      className="h-64 w-full object-cover bg-black transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
                     <img
-                      src={item.image}
+                      src={
+                        item.media?.startsWith("http")
+                          ? item.media
+                          : `http://localhost:5000${item.media}`
+                      }
                       alt={item.title}
                       loading="lazy"
                       className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
                     />
+                  )}
 
                     <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm">
                       {item.category}

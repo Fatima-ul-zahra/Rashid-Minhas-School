@@ -7,7 +7,6 @@ import teacherService from "../../services/teacherService";
 
 const initialForm = {
   name: "",
-  photo: "",
   email: "",
   phone: "",
   qualification: "",
@@ -27,6 +26,9 @@ function TeacherForm() {
 
   const [form, setForm] = useState(initialForm);
   const [classes, setClasses] = useState([]);
+
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -51,13 +53,13 @@ function TeacherForm() {
 
           setForm({
             name: teacher.name || "",
-            photo: teacher.photo || "",
             email: teacher.email || "",
             phone: teacher.phone || "",
             qualification:
               teacher.qualification || "",
             subject: teacher.subject || "",
-            experience: teacher.experience || "",
+            experience:
+              teacher.experience || "",
             joiningDate: teacher.joiningDate
               ? teacher.joiningDate.slice(0, 10)
               : "",
@@ -65,8 +67,18 @@ function TeacherForm() {
               teacher.assignedClasses?.map(
                 (item) => item._id
               ) || [],
-            status: teacher.status || "active",
+            status:
+              teacher.status || "active",
           });
+
+          if (teacher.photo) {
+            const photoUrl =
+              teacher.photo.startsWith("http")
+                ? teacher.photo
+                : `http://localhost:5000${teacher.photo}`;
+
+            setPhotoPreview(photoUrl);
+          }
         }
       } catch (error) {
         setError(
@@ -104,6 +116,59 @@ function TeacherForm() {
     }));
   };
 
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Only JPG, PNG and WEBP images are allowed."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError(
+        "Teacher photo must be smaller than 10 MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+    setPhotoFile(file);
+
+    const previewUrl = URL.createObjectURL(file);
+
+    setPhotoPreview(previewUrl);
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview("");
+
+    const fileInput =
+      document.getElementById(
+        "teacher-photo"
+      );
+
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -116,16 +181,58 @@ function TeacherForm() {
       setSaving(true);
       setError("");
 
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("phone", form.phone);
+      formData.append(
+        "qualification",
+        form.qualification
+      );
+      formData.append(
+        "subject",
+        form.subject
+      );
+      formData.append(
+        "experience",
+        form.experience
+      );
+      formData.append(
+        "joiningDate",
+        form.joiningDate
+      );
+      formData.append(
+        "status",
+        form.status
+      );
+
+      form.assignedClasses.forEach(
+        (classId) => {
+          formData.append(
+            "assignedClasses",
+            classId
+          );
+        }
+      );
+
+      if (photoFile) {
+        formData.append(
+          "photo",
+          photoFile
+        );
+      }
+
       if (isEdit) {
         await teacherService.updateTeacher(
           token,
           id,
-          form
+          formData
         );
       } else {
         await teacherService.createTeacher(
           token,
-          form
+          formData
         );
       }
 
@@ -156,7 +263,9 @@ function TeacherForm() {
         </p>
 
         <h1 className="mt-1 text-2xl font-bold text-slate-900">
-          {isEdit ? "Edit Teacher" : "Add Teacher"}
+          {isEdit
+            ? "Edit Teacher"
+            : "Add Teacher"}
         </h1>
       </div>
 
@@ -171,6 +280,7 @@ function TeacherForm() {
         className="mt-6 max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="grid gap-5 md:grid-cols-2">
+
           <Field
             label="Teacher Name"
             name="name"
@@ -179,13 +289,50 @@ function TeacherForm() {
             required
           />
 
-          <Field
-            label="Photo URL"
-            name="photo"
-            value={form.photo}
-            onChange={handleChange}
-            placeholder="Optional"
-          />
+          {/* Teacher Photo */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Teacher Photo
+            </label>
+
+            <input
+              id="teacher-photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoChange}
+              className="w-full cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+            />
+
+            <p className="mt-2 text-xs text-slate-500">
+              JPG, PNG or WEBP. Maximum size: 10 MB.
+            </p>
+
+            {photoFile && (
+              <p className="mt-2 text-xs font-medium text-blue-700">
+                Selected: {photoFile.name}
+              </p>
+            )}
+
+            {photoPreview && (
+              <div className="mt-4">
+                <div className="relative inline-block">
+                  <img
+                    src={photoPreview}
+                    alt="Teacher preview"
+                    className="h-32 w-32 rounded-2xl border border-slate-200 object-cover shadow-sm"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={removePhoto}
+                    className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 font-bold text-white shadow-md hover:bg-red-700"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <Field
             label="Email"
@@ -232,6 +379,7 @@ function TeacherForm() {
             onChange={handleChange}
           />
 
+          {/* Status */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Status
@@ -253,6 +401,7 @@ function TeacherForm() {
             </select>
           </div>
 
+          {/* Classes */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Assigned Classes
@@ -275,7 +424,8 @@ function TeacherForm() {
             </select>
 
             <p className="mt-2 text-xs text-slate-500">
-              Hold Ctrl while selecting multiple classes.
+              Hold Ctrl while selecting multiple
+              classes.
             </p>
           </div>
         </div>
@@ -318,8 +468,11 @@ function Field({
     <div>
       <label className="mb-2 block text-sm font-semibold text-slate-700">
         {label}
+
         {required && (
-          <span className="text-red-500"> *</span>
+          <span className="text-red-500">
+            {" "}*
+          </span>
         )}
       </label>
 

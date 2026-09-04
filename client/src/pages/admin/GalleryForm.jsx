@@ -7,7 +7,8 @@ import galleryService from "../../services/galleryService";
 const initialForm = {
   title: "",
   caption: "",
-  image: "",
+  media: "",
+  mediaType: "image",
   category: "General",
   status: "published",
 };
@@ -20,6 +21,10 @@ function GalleryForm() {
   const isEdit = Boolean(id);
 
   const [form, setForm] = useState(initialForm);
+
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState("");
+
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -38,10 +43,20 @@ function GalleryForm() {
         setForm({
           title: item.title || "",
           caption: item.caption || "",
-          image: item.image || "",
+          media: item.media || "",
+          mediaType: item.mediaType || "image",
           category: item.category || "General",
           status: item.status || "published",
         });
+
+        if (item.media) {
+          const mediaUrl =
+            item.media.startsWith("http")
+              ? item.media
+              : `http://localhost:5000${item.media}`;
+
+          setMediaPreview(mediaUrl);
+        }
       } catch (error) {
         setError(
           error.response?.data?.message ||
@@ -68,6 +83,76 @@ function GalleryForm() {
     }));
   };
 
+  const handleMediaChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        "Only JPG, PNG, WEBP, MP4, WEBM and MOV files are allowed."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 100 * 1024 * 1024) {
+      setError(
+        "Image or video must be smaller than 100MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+
+    setMediaFile(file);
+
+    const previewUrl = URL.createObjectURL(file);
+
+    setMediaPreview(previewUrl);
+
+    const mediaType = file.type.startsWith("video/")
+      ? "video"
+      : "image";
+
+    setForm((current) => ({
+      ...current,
+      mediaType,
+    }));
+  };
+
+  const removeMedia = () => {
+    setMediaFile(null);
+    setMediaPreview("");
+
+    setForm((current) => ({
+      ...current,
+      media: "",
+      mediaType: "image",
+    }));
+
+    const fileInput =
+      document.getElementById("gallery-media");
+
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -76,8 +161,14 @@ function GalleryForm() {
       return;
     }
 
-    if (!form.image.trim()) {
-      setError("Image URL is required.");
+    /*
+     * A new file is required when creating.
+     * During editing, the existing media can remain.
+     */
+    if (!isEdit && !mediaFile) {
+      setError(
+        "Please select an image or video."
+      );
       return;
     }
 
@@ -85,16 +176,45 @@ function GalleryForm() {
       setSaving(true);
       setError("");
 
+      const formData = new FormData();
+
+      formData.append(
+        "title",
+        form.title
+      );
+
+      formData.append(
+        "caption",
+        form.caption
+      );
+
+      formData.append(
+        "category",
+        form.category
+      );
+
+      formData.append(
+        "status",
+        form.status
+      );
+
+      if (mediaFile) {
+        formData.append(
+          "media",
+          mediaFile
+        );
+      }
+
       if (isEdit) {
         await galleryService.updateGalleryItem(
           token,
           id,
-          form
+          formData
         );
       } else {
         await galleryService.createGalleryItem(
           token,
-          form
+          formData
         );
       }
 
@@ -125,8 +245,8 @@ function GalleryForm() {
 
       <h1 className="mt-1 text-2xl font-bold text-slate-900">
         {isEdit
-          ? "Edit Gallery Image"
-          : "Add Gallery Image"}
+          ? "Edit Gallery Media"
+          : "Add Gallery Media"}
       </h1>
 
       {error && (
@@ -140,6 +260,8 @@ function GalleryForm() {
         className="mt-6 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="space-y-5">
+
+          {/* Title */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Title *
@@ -155,39 +277,68 @@ function GalleryForm() {
             />
           </div>
 
+          {/* Media Upload */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Image URL *
+              Image / Video *
             </label>
 
             <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              required
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
+              id="gallery-media"
+              type="file"
+              accept="
+                image/jpeg,
+                image/png,
+                image/webp,
+                video/mp4,
+                video/webm,
+                video/quicktime
+              "
+              onChange={handleMediaChange}
+              className="block w-full rounded-xl border border-slate-300 p-3 text-sm"
             />
+
+            <p className="mt-2 text-xs text-slate-500">
+              Images: JPG, PNG, WEBP
+              <br />
+              Videos: MP4, WEBM, MOV
+              <br />
+              Maximum file size: 100MB
+            </p>
           </div>
 
-          {form.image && (
+          {/* Preview */}
+          {mediaPreview && (
             <div>
               <p className="mb-2 text-sm font-semibold text-slate-700">
                 Preview
               </p>
 
-              <img
-                src={form.image}
-                alt="Preview"
-                className="h-56 w-full rounded-xl object-cover"
-                onError={(event) => {
-                  event.currentTarget.style.display =
-                    "none";
-                }}
-              />
+              {form.mediaType === "video" ? (
+                <video
+                  src={mediaPreview}
+                  controls
+                  className="h-64 w-full rounded-xl bg-black object-contain"
+                />
+              ) : (
+                <img
+                  src={mediaPreview}
+                  alt="Gallery preview"
+                  className="h-64 w-full rounded-xl object-cover"
+                />
+              )}
+
+              <button
+                type="button"
+                onClick={removeMedia}
+                className="mt-3 rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+              >
+                Remove Media
+              </button>
             </div>
           )}
 
+          {/* Caption */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               Caption
@@ -198,12 +349,14 @@ function GalleryForm() {
               value={form.caption}
               onChange={handleChange}
               rows="4"
-              placeholder="Short description of the photograph..."
+              placeholder="Short description of the photograph or video..."
               className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600"
             />
           </div>
 
+          {/* Category + Status */}
           <div className="grid gap-5 md:grid-cols-2">
+
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Category
@@ -238,13 +391,16 @@ function GalleryForm() {
                 </option>
               </select>
             </div>
+
           </div>
         </div>
 
+        {/* Buttons */}
         <div className="mt-8 flex justify-end gap-3">
+
           <Link
             to="/admin/gallery"
-            className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700"
+            className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
             Cancel
           </Link>
@@ -257,9 +413,10 @@ function GalleryForm() {
             {saving
               ? "Saving..."
               : isEdit
-              ? "Update Image"
-              : "Add Image"}
+              ? "Update Media"
+              : "Add Media"}
           </button>
+
         </div>
       </form>
     </div>

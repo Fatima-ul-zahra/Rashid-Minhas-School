@@ -3,15 +3,33 @@ import { useState } from "react";
 const contactInformation = [
   {
     title: "Address",
-    value: "Official school address to be provided",
+    value: "View School Location",
+    href: "https://maps.app.goo.gl/phKEs9ZgTqRuTXxa6",
   },
   {
     title: "Phone",
-    value: "Official school phone number to be provided",
+    value: "0334 7675556",
+    href: "tel:03347675556",
   },
   {
     title: "Email",
-    value: "Official school email to be provided",
+    value: "rmalipur@gmail.com",
+    href: "mailto:rmalipur@gmail.com",
+  },
+];
+
+const socialMedia = [
+  {
+    name: "Facebook",
+    url: "https://www.facebook.com/rashidminhasschoolalipur/",
+  },
+  {
+    name: "Instagram",
+    url: "https://www.instagram.com/rashid_minhas_alipur/?hl=en",
+  },
+  {
+    name: "YouTube",
+    url: "https://www.youtube.com/@rashidminhasgroupofschools9156",
   },
 ];
 
@@ -91,9 +109,18 @@ function Contact() {
                   {item.title}
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <a
+                  href={item.href}
+                  target={item.title === "Address" ? "_blank" : undefined}
+                  rel={
+                    item.title === "Address"
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
+                  className="mt-2 inline-block text-sm leading-6 text-blue-700 hover:underline"
+                >
                   {item.value}
-                </p>
+                </a>
               </div>
             ))}
           </div>
@@ -242,7 +269,7 @@ function Contact() {
             </form>
           </div>
 
-          {/* Map Placeholder */}
+          {/* School Location */}
           <div>
             <span className="text-sm font-semibold uppercase tracking-wider text-blue-700">
               Location
@@ -253,8 +280,7 @@ function Contact() {
             </h2>
 
             <p className="mt-4 leading-7 text-slate-600">
-              An official map location will be embedded once the verified
-              school address is provided.
+              Visit our school location using Google Maps.
             </p>
 
             <div className="mt-8 flex min-h-[500px] items-center justify-center rounded-3xl bg-slate-900 p-8 text-center shadow-lg">
@@ -268,44 +294,73 @@ function Contact() {
                 </h3>
 
                 <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-400">
-                  Google Maps or another map service can be embedded here
-                  after the official school address and coordinates are
-                  confirmed.
+                  Find Rashid Minhas Secondary School, Ali Pur on Google Maps.
                 </p>
+
+                <a
+                  href="https://maps.app.goo.gl/phKEs9ZgTqRuTXxa6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex rounded-xl bg-blue-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                >
+                  Open in Google Maps
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Social Media */}
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <span className="text-sm font-semibold uppercase tracking-wider text-blue-700">
-            Social Media
-          </span>
+{/* Social Media */}
+<section className="bg-white py-16">
+  <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+    <span className="text-sm font-semibold uppercase tracking-wider text-blue-700">
+      Social Media
+    </span>
 
-          <h2 className="mt-3 text-3xl font-bold text-slate-900">
-            Stay Connected
-          </h2>
+    <h2 className="mt-3 text-3xl font-bold text-slate-900">
+      Stay Connected
+    </h2>
 
-          <p className="mt-4 text-slate-600">
-            Official social media links will be added once provided by the
-            school administration.
-          </p>
+    <p className="mt-4 text-slate-600">
+      Follow Rashid Minhas Secondary School, Ali Pur on our official
+      social media platforms.
+    </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            {["Facebook", "Instagram", "YouTube"].map((platform) => (
-              <span
-                key={platform}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-400"
-              >
-                {platform}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+    <div className="mt-8 flex flex-wrap justify-center gap-4">
+      {/* Facebook */}
+      <a
+        href="https://www.facebook.com/rashidminhasschoolalipur/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl bg-[#1877F2] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:bg-[#166FE5] hover:shadow-lg"
+      >
+        Facebook
+      </a>
+
+      {/* Instagram */}
+      <a
+        href="https://www.instagram.com/rashid_minhas_alipur/?hl=en"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+      >
+        Instagram
+      </a>
+
+      {/* YouTube */}
+      <a
+        href="https://www.youtube.com/@rashidminhasgroupofschools9156"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-xl bg-[#FF0000] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:bg-[#CC0000] hover:shadow-lg"
+      >
+        YouTube
+      </a>
+    </div>
+  </div>
+</section>
+
     </div>
   );
 }

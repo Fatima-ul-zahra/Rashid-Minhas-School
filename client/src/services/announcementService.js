@@ -2,35 +2,26 @@ import apiClient from "./apiClient";
 
 const announcementService = {
   getPublicAnnouncements: async () => {
-    const response = await apiClient.get(
-      "/announcements"
-    );
-
+    const response = await apiClient.get("/announcements");
     return response.data;
   },
 
   getAdminAnnouncements: async (token) => {
-    const response = await apiClient.get(
-      "/announcements/admin",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await apiClient.get("/announcements/admin", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return response.data;
   },
 
   getAnnouncement: async (token, id) => {
-    const response = await apiClient.get(
-      `/announcements/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await apiClient.get(`/announcements/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return response.data;
   },

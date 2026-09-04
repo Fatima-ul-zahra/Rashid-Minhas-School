@@ -10,6 +10,7 @@ import {
 
 import protect from "../middleware/authMiddleware.js";
 import authorize from "../middleware/roleMiddleware.js";
+import uploadImage from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -31,6 +32,7 @@ router.post(
   "/",
   protect,
   authorize("admin"),
+  uploadImage.single("photo"),
   createTeacher
 );
 
@@ -38,6 +40,7 @@ router.put(
   "/:id",
   protect,
   authorize("admin"),
+  uploadImage.single("photo"),
   updateTeacher
 );
 

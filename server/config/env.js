@@ -15,6 +15,16 @@ for (const variable of requiredEnvVariables) {
   }
 }
 
+// CLIENT_URL is required in production
+if (
+  process.env.NODE_ENV === "production" &&
+  !process.env.CLIENT_URL
+) {
+  throw new Error(
+    "CLIENT_URL is required in production."
+  );
+}
+
 const env = {
   port: Number(process.env.PORT) || 5000,
 
@@ -26,7 +36,9 @@ const env = {
 
   clientUrl:
     process.env.CLIENT_URL ||
-    "http://localhost:5173",
+    (process.env.NODE_ENV === "development"
+      ? "http://localhost:5173"
+      : ""),
 
   jwtSecret:
     process.env.JWT_SECRET,

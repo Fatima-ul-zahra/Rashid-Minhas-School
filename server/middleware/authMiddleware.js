@@ -7,17 +7,37 @@ import env from "../config/env.js";
 const protect = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  // Authorization header must contain a Bearer token
+  if (
+    !authHeader ||
+    typeof authHeader !== "string" ||
+    !authHeader.startsWith("Bearer ")
+  ) {
+    throw new ApiError(401, "Authentication required.");
+  }
+
+  const token = authHeader.slice(7).trim();
+
+  // Reject missing or obviously malformed tokens
+  if (!token || token.split(".").length !== 3) {
     throw new ApiError(
       401,
-      "Authentication required."
+      "Invalid authentication token."
     );
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
-    const decoded = jwt.verify(token, env.jwtSecret);
+    const decoded = jwt.verify(token, env.jwtSecret, {
+      algorithms: ["HS256"],
+    });
+
+    // Token must contain a valid user ID
+    if (!decoded || !decoded.userId) {
+      throw new ApiError(
+        401,
+        "Invalid authentication token."
+      );
+    }
 
     const user = await User.findById(decoded.userId);
 
@@ -28,6 +48,7 @@ const protect = asyncHandler(async (req, res, next) => {
       );
     }
 
+    // Immediately block disabled accounts
     if (!user.isActive) {
       throw new ApiError(
         403,
@@ -35,14 +56,17 @@ const protect = asyncHandler(async (req, res, next) => {
       );
     }
 
+    // Attach authenticated user to request
     req.user = user;
 
     next();
   } catch (error) {
+    // Preserve our intentional API errors
     if (error instanceof ApiError) {
       throw error;
     }
 
+    // Hide JWT implementation details from clients
     throw new ApiError(
       401,
       "Invalid or expired authentication token."

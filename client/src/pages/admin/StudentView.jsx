@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import studentService from "../../services/studentService";
+import StudentDailyActivity from "../../components/admin/StudentDailyActivity";
 
 function StudentView() {
   const { token } = useAuth();
@@ -15,6 +16,9 @@ function StudentView() {
   useEffect(() => {
     const loadStudent = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const response =
           await studentService.getStudentById(
             token,
@@ -57,6 +61,7 @@ function StudentView() {
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-blue-700">
@@ -66,6 +71,10 @@ function StudentView() {
           <h1 className="mt-1 text-2xl font-bold text-slate-900">
             Student Profile
           </h1>
+
+          <p className="mt-1 text-sm text-slate-500">
+            View student information and daily progress.
+          </p>
         </div>
 
         <Link
@@ -76,19 +85,24 @@ function StudentView() {
         </Link>
       </div>
 
+      {/* Student Information */}
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           {student.photo ? (
-            <img
-              src={student.photo}
-              alt={student.name}
-              className="h-28 w-28 rounded-2xl object-cover"
-            />
-          ) : (
-            <div className="flex h-28 w-28 items-center justify-center rounded-2xl bg-blue-100 text-3xl font-bold text-blue-700">
-              {student.name.charAt(0)}
-            </div>
-          )}
+          <img
+            src={
+              student.photo.startsWith("http")
+                ? student.photo
+                : `http://localhost:5000${student.photo}`
+            }
+            alt={student.name}
+            className="h-28 w-28 rounded-2xl object-cover"
+          />
+        ) : (
+          <div className="flex h-28 w-28 items-center justify-center rounded-2xl bg-blue-100 text-3xl font-bold text-blue-700">
+            {student.name.charAt(0)}
+          </div>
+        )}
 
           <div>
             <h2 className="text-2xl font-bold text-slate-900">
@@ -106,27 +120,53 @@ function StudentView() {
         </div>
 
         <div className="mt-8 grid gap-5 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Info label="Admission Number" value={student.admissionNumber} />
-          <Info label="Roll Number" value={student.rollNumber || "—"} />
-          <Info label="Class" value={student.class} />
-          <Info label="Gender" value={student.gender} />
-          <Info label="Phone" value={student.phone || "—"} />
+          <Info
+            label="Admission Number"
+            value={student.admissionNumber}
+          />
+
+          <Info
+            label="Roll Number"
+            value={student.rollNumber || "—"}
+          />
+
+          <Info
+            label="Class"
+            value={student.class}
+          />
+
+          <Info
+            label="Gender"
+            value={student.gender}
+          />
+
+          <Info
+            label="Phone"
+            value={student.phone || "—"}
+          />
+
           <Info
             label="Date of Birth"
             value={
               student.dateOfBirth
-                ? new Date(student.dateOfBirth).toLocaleDateString()
+                ? new Date(
+                    student.dateOfBirth
+                  ).toLocaleDateString()
                 : "—"
             }
           />
+
           <Info
             label="Admission Date"
             value={
               student.admissionDate
-                ? new Date(student.admissionDate).toLocaleDateString()
+                ? new Date(
+                    student.admissionDate
+                  ).toLocaleDateString()
                 : "—"
             }
           />
+
           <div className="sm:col-span-2">
             <Info
               label="Address"
@@ -135,6 +175,11 @@ function StudentView() {
           </div>
         </div>
       </div>
+
+      {/* Daily Activity */}
+      <StudentDailyActivity
+        studentId={student._id}
+      />
     </div>
   );
 }

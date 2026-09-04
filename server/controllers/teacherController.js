@@ -31,16 +31,24 @@ const getTeacherById = asyncHandler(async (req, res) => {
 const createTeacher = asyncHandler(async (req, res) => {
   const {
     name,
-    photo,
     email,
     phone,
     qualification,
     subject,
     experience,
     joiningDate,
-    assignedClasses,
     status,
   } = req.body;
+
+  let assignedClasses = req.body.assignedClasses || [];
+
+  // Multipart form data can send a single class as a string.
+  if (!Array.isArray(assignedClasses)) {
+    assignedClasses = [assignedClasses];
+  }
+
+  // Remove empty values
+  assignedClasses = assignedClasses.filter(Boolean);
 
   if (!name) {
     throw new ApiError(
@@ -49,10 +57,13 @@ const createTeacher = asyncHandler(async (req, res) => {
     );
   }
 
-  if (assignedClasses?.length) {
-    const validClasses = await Class.countDocuments({
-      _id: { $in: assignedClasses },
-    });
+  if (assignedClasses.length) {
+    const validClasses =
+      await Class.countDocuments({
+        _id: {
+          $in: assignedClasses,
+        },
+      });
 
     if (validClasses !== assignedClasses.length) {
       throw new ApiError(
@@ -60,6 +71,13 @@ const createTeacher = asyncHandler(async (req, res) => {
         "One or more assigned classes are invalid."
       );
     }
+  }
+
+  let photo = "";
+
+  // Save uploaded photo path
+  if (req.file) {
+    photo = `/uploads/teachers/${req.file.filename}`;
   }
 
   const teacher = await Teacher.create({
@@ -70,7 +88,7 @@ const createTeacher = asyncHandler(async (req, res) => {
     qualification,
     subject,
     experience,
-    joiningDate,
+    joiningDate: joiningDate || null,
     assignedClasses,
     status,
   });
@@ -97,22 +115,85 @@ const updateTeacher = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Teacher not found.");
   }
 
-  if (req.body.assignedClasses?.length) {
-    const validClasses = await Class.countDocuments({
-      _id: { $in: req.body.assignedClasses },
-    });
+  let assignedClasses =
+    req.body.assignedClasses;
 
-    if (
-      validClasses !== req.body.assignedClasses.length
-    ) {
-      throw new ApiError(
-        400,
-        "One or more assigned classes are invalid."
-      );
+  if (assignedClasses !== undefined) {
+    if (!Array.isArray(assignedClasses)) {
+      assignedClasses = [assignedClasses];
     }
+
+    assignedClasses =
+      assignedClasses.filter(Boolean);
+
+    if (assignedClasses.length) {
+      const validClasses =
+        await Class.countDocuments({
+          _id: {
+            $in: assignedClasses,
+          },
+        });
+
+      if (
+        validClasses !==
+        assignedClasses.length
+      ) {
+        throw new ApiError(
+          400,
+          "One or more assigned classes are invalid."
+        );
+      }
+    }
+
+    teacher.assignedClasses = assignedClasses;
   }
 
-  Object.assign(teacher, req.body);
+  if (req.body.name !== undefined) {
+    if (!req.body.name.trim()) {
+      throw new ApiError(
+        400,
+        "Teacher name is required."
+      );
+    }
+
+    teacher.name = req.body.name.trim();
+  }
+
+  if (req.body.email !== undefined) {
+    teacher.email = req.body.email;
+  }
+
+  if (req.body.phone !== undefined) {
+    teacher.phone = req.body.phone;
+  }
+
+  if (req.body.qualification !== undefined) {
+    teacher.qualification =
+      req.body.qualification;
+  }
+
+  if (req.body.subject !== undefined) {
+    teacher.subject = req.body.subject;
+  }
+
+  if (req.body.experience !== undefined) {
+    teacher.experience = req.body.experience;
+  }
+
+  if (req.body.joiningDate !== undefined) {
+    teacher.joiningDate =
+      req.body.joiningDate || null;
+  }
+
+  if (req.body.status !== undefined) {
+    teacher.status = req.body.status;
+  }
+
+  // Replace photo only when a new photo is uploaded
+  if (req.file) {
+    teacher.photo =
+      `/uploads/teachers/${req.file.filename}`;
+  }
 
   await teacher.save();
 

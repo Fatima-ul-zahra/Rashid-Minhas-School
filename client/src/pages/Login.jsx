@@ -52,9 +52,11 @@ function Login() {
         {/* Login Card */}
         <div className="rounded-3xl bg-white p-8 shadow-2xl">
           <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-700 text-xl font-bold text-white">
-              RM
-            </div>
+            <img
+              src="/school-logo.png"
+              alt="Rashid Minhas Secondary School Logo"
+              className="mx-auto h-20 w-20 object-contain"
+            />
 
             <h1 className="mt-6 text-2xl font-bold text-slate-900">
               Admin Login
@@ -114,7 +116,7 @@ function Login() {
               disabled={loading}
               className="w-full rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Login..." : "Login"}
             </button>
           </form>
         </div>
