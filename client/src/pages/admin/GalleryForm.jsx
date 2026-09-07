@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import galleryService from "../../services/galleryService";
+import API_SERVER_URL from "../../config/apiServer";
 
 const initialForm = {
   title: "",
@@ -53,7 +54,7 @@ function GalleryForm() {
           const mediaUrl =
             item.media.startsWith("http")
               ? item.media
-              : `http://localhost:5000${item.media}`;
+              : `${API_SERVER_URL}${item.media}`;
 
           setMediaPreview(mediaUrl);
         }

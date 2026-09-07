@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import galleryService from "../../services/galleryService";
+import API_SERVER_URL from "../../config/apiServer";
 
 function Gallery() {
   const { token } = useAuth();
@@ -157,7 +158,7 @@ function Gallery() {
 
     return media.startsWith("http")
       ? media
-      : `http://localhost:5000${media}`;
+      : `${API_SERVER_URL}${media}`;
   };
 
   return (

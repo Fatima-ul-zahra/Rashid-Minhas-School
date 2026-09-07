@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import studentService from "../../services/studentService";
+import API_SERVER_URL from "../../config/apiServer";
 
 const initialForm = {
   name: "",
@@ -65,7 +66,7 @@ function StudentForm() {
         if (student.photo) {
           const photoUrl = student.photo.startsWith("http")
             ? student.photo
-            : `http://localhost:5000${student.photo}`;
+            : `${API_SERVER_URL}${student.photo}`;
 
           setPhotoPreview(photoUrl);
         }

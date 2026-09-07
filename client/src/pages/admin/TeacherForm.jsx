@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import classService from "../../services/classService";
 import teacherService from "../../services/teacherService";
+import API_SERVER_URL from "../../config/apiServer";
 
 const initialForm = {
   name: "",
@@ -75,7 +76,7 @@ function TeacherForm() {
             const photoUrl =
               teacher.photo.startsWith("http")
                 ? teacher.photo
-                : `http://localhost:5000${teacher.photo}`;
+                : `${API_SERVER_URL}${teacher.photo}`;
 
             setPhotoPreview(photoUrl);
           }

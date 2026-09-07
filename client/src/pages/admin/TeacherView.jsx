@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import teacherService from "../../services/teacherService";
+import API_SERVER_URL from "../../config/apiServer";
 
 function TeacherView() {
   const { token } = useAuth();
@@ -88,7 +89,7 @@ function TeacherView() {
             src={
               teacher.photo.startsWith("http")
                 ? teacher.photo
-                : `http://localhost:5000${teacher.photo}`
+                : `${API_SERVER_URL}${teacher.photo}`
             }
             alt={teacher.name}
             className="h-32 w-32 rounded-2xl object-cover"

@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import studentService from "../../services/studentService";
 import StudentDailyActivity from "../../components/admin/StudentDailyActivity";
+import API_SERVER_URL from "../../config/apiServer";
 
 function StudentView() {
   const { token } = useAuth();
@@ -93,7 +94,7 @@ function StudentView() {
             src={
               student.photo.startsWith("http")
                 ? student.photo
-                : `http://localhost:5000${student.photo}`
+                : `${API_SERVER_URL}${student.photo}`
             }
             alt={student.name}
             className="h-28 w-28 rounded-2xl object-cover"

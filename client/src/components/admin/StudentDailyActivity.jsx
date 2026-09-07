@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import studentDailyActivityService from "../../services/studentDailyActivityService";
 
-const API_SERVER = "http://localhost:5000";
+import API_SERVER from "../../config/apiServer";
 
 function getMediaUrl(url) {
   if (!url) return "";

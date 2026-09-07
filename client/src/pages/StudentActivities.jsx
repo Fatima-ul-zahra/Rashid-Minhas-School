@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import studentActivityService from "../services/studentActivityService";
 
-const API_URL = "http://localhost:5000";
+import API_URL from "../config/apiServer";
 
 /*
 |--------------------------------------------------------------------------

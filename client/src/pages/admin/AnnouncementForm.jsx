@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import announcementService from "../../services/announcementService";
+import API_SERVER_URL from "../../config/apiServer";
 
 const initialForm = {
   title: "",
@@ -53,7 +54,7 @@ function AnnouncementForm() {
           setImagePreview(
             announcement.image.startsWith("http")
               ? announcement.image
-              : `http://localhost:5000${announcement.image}`
+              : `${API_SERVER_URL}${announcement.image}`
           );
         }
       } catch (error) {

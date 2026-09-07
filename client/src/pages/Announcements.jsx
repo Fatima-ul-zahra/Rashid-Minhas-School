@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import announcementService from "../services/announcementService";
+import API_SERVER_URL from "../config/apiServer";
 
 function Announcements() {
   const [announcements, setAnnouncements] = useState([]);
@@ -80,7 +81,7 @@ function Announcements() {
                         src={
                           announcement.image.startsWith("http")
                             ? announcement.image
-                            : `http://localhost:5000${announcement.image}`
+                            : `${API_SERVER_URL}${announcement.image}`
                         }
                         alt={announcement.title}
                         className="w-full h-64 object-cover rounded-xl"

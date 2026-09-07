@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import galleryService from "../services/galleryService";
+import API_SERVER_URL from "../config/apiServer";
 
 function Gallery() {
   const [items, setItems] = useState([]);
@@ -130,7 +131,7 @@ function Gallery() {
                       src={
                         item.media?.startsWith("http")
                           ? item.media
-                          : `http://localhost:5000${item.media}`
+                          : `${API_SERVER_URL}${item.media}`
                       }
                       controls
                       preload="metadata"
@@ -141,7 +142,7 @@ function Gallery() {
                       src={
                         item.media?.startsWith("http")
                           ? item.media
-                          : `http://localhost:5000${item.media}`
+                          : `${API_SERVER_URL}${item.media}`
                       }
                       alt={item.title}
                       loading="lazy"
